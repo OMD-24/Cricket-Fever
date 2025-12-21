@@ -1,0 +1,17 @@
+# Global
+*.log
+*.env
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Node
+node_modules/
+
+# Maven
+target/
+
+# Secrets
+application.properties
