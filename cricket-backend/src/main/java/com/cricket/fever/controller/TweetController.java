@@ -1,6 +1,7 @@
 package com.cricket.fever.controller;
 
 import com.cricket.fever.Entity.Tweet;
+import com.cricket.fever.common.response.ApiResponse;
 import com.cricket.fever.service.TweetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,9 @@ public class TweetController {
     private TweetService tweetService;
 
     @PostMapping("/broadcast")
-    public ResponseEntity<Tweet> broadcast(@RequestBody Tweet tweet) {
-        return ResponseEntity.ok(tweetService.saveTweet(tweet));
+    public ApiResponse<Tweet> broadcast(@RequestBody Tweet tweet) {
+        return new ApiResponse<>(true,"Broadcast created",
+                tweetService.saveTweet(tweet));
     }
 
     @GetMapping("/all")

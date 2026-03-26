@@ -2,6 +2,7 @@ package com.cricket.fever.service;
 
 import com.cricket.fever.Entity.Player;
 import com.cricket.fever.dto.PlayerDTO;
+import com.cricket.fever.exception.PlayerNotFoundException;
 import com.cricket.fever.repository.PlayerRepository;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ public class PlayerService {
     public PlayerDTO updateProfile(PlayerDTO dto) {
 
         Player entity = playerRepository.findById(dto.getId())
-                .orElseThrow(() -> new RuntimeException("Player not found with ID: " + dto.getId()));
-
+                .orElseThrow(() ->
+                        new PlayerNotFoundException("Player not found with ID: " + dto.getId()));
 
         entity.setName(dto.getName());
         entity.setJerseyNo(dto.getJerseyNo());
@@ -37,9 +38,9 @@ public class PlayerService {
     }
 
 
-    public PlayerDTO getPlayerById(Long id) {
+    public PlayerDTO getPlayer(Long id) {
         Player player = playerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Player not found"));
+                .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + id));
         return convertToDto(player);
     }
 
@@ -53,9 +54,7 @@ public class PlayerService {
         return dto;
     }
 
-    public Player getPlayer(Long id){
-        return playerRepository.findById(id).orElseThrow();
-    }
+
 
 
     public @Nullable List<PlayerDTO> searchByJersey(String query) {
@@ -76,7 +75,7 @@ public class PlayerService {
 
     public PlayerDTO registerPlayer(Player player) {
         if (playerRepository.findByEmail(player.getEmail()).isPresent()) {
-            throw new RuntimeException("Player with this email already exists!");
+            throw new IllegalArgumentException("Player with this email already exists");
         }
         Player saved = playerRepository.save(player);
         return convertToDto(saved);
@@ -85,10 +84,11 @@ public class PlayerService {
 
     public PlayerDTO loginPlayer(String email, String password) {
         Player player = playerRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Invalid Email or Password"));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Invalid Email or Password"));
 
         if (!player.getPassword().equals(password)) {
-            throw new RuntimeException("Invalid Email or Password");
+            throw new IllegalArgumentException("Invalid Email or Password");
         }
 
         return convertToDto(player);

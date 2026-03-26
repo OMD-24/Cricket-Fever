@@ -1,6 +1,7 @@
 package com.cricket.fever.service;
 
 import com.cricket.fever.Entity.Tweet;
+import com.cricket.fever.exception.PlayerNotFoundException;
 import com.cricket.fever.repository.TweetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ public class TweetService{
     private TweetRepository tweetRepository;
 
     public Tweet saveTweet(Tweet tweet) {
-        // Logic: Clean the text before saving
+
         if (tweet.getText() != null) {
             tweet.setText(tweet.getText().trim());
         }
@@ -28,14 +29,13 @@ public class TweetService{
         if (tweetRepository.existsById(id)) {
             tweetRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Tweet not found with id: " + id);
+            throw new PlayerNotFoundException("Tweet not found with id: " + id);
         }
     }
     public Tweet incrementCheers(Long id) {
         Tweet tweet = tweetRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Broadcast not found"));
+                .orElseThrow(() -> new PlayerNotFoundException("Broadcast not found"));
 
-        // Convert string cheer to int, increment, and save back
         int currentCheers = Integer.parseInt(tweet.getCheers());
         tweet.setCheers(String.valueOf(currentCheers + 1));
 
