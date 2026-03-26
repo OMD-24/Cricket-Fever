@@ -19,6 +19,7 @@ public class Tweet {
 
     @Column(length = 280)
     private String text;
-    private String cheers = "0";
+    @Column(nullable = false)
+    private Integer cheers = 0;
     private LocalDateTime createdAt = LocalDateTime.now();
 }

@@ -2,10 +2,13 @@ package com.cricket.fever.controller;
 
 import com.cricket.fever.Entity.Player;
 import com.cricket.fever.common.response.ApiResponse;
+import com.cricket.fever.dto.LoginRequest;
 import com.cricket.fever.dto.PlayerDTO;
+import com.cricket.fever.dto.RegisterRequest;
 import com.cricket.fever.service.PlayerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,27 +50,25 @@ public class PlayerController {
     }
 
     @PostMapping("/register")
-    public ApiResponse<PlayerDTO> register(@RequestBody Player player) {
-        return new ApiResponse<>(
-                true,
-                "Player registered successfully",
-                playerService.registerPlayer(player)
+    public ResponseEntity<ApiResponse<PlayerDTO>> register(
+            @Valid @RequestBody RegisterRequest request) {
+
+        PlayerDTO player = playerService.registerPlayer(request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Player registered successfully", player)
         );
     }
 
     @PostMapping("/login")
-    public ApiResponse<PlayerDTO> login(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<ApiResponse<PlayerDTO>> login(
+            @Valid @RequestBody LoginRequest request) {
 
-        PlayerDTO authenticatedPlayer =
-                playerService.loginPlayer(
-                        credentials.get("email"),
-                        credentials.get("password")
-                );
+        PlayerDTO player =
+                playerService.loginPlayer(request.getEmail(), request.getPassword());
 
-        return new ApiResponse<>(
-                true,
-                "Login successful",
-                authenticatedPlayer
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Login successful", player)
         );
     }
 }

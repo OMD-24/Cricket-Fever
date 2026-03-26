@@ -2,6 +2,9 @@ package com.cricket.fever.service;
 
 import com.cricket.fever.Entity.Player;
 import com.cricket.fever.dto.PlayerDTO;
+import com.cricket.fever.dto.RegisterRequest;
+import com.cricket.fever.exception.DuplicatePlayerException;
+import com.cricket.fever.exception.InvalidCredentialsException;
 import com.cricket.fever.exception.PlayerNotFoundException;
 import com.cricket.fever.repository.PlayerRepository;
 import org.jspecify.annotations.Nullable;
@@ -73,22 +76,35 @@ public class PlayerService {
         }).collect(Collectors.toList());
     }
 
-    public PlayerDTO registerPlayer(Player player) {
-        if (playerRepository.findByEmail(player.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Player with this email already exists");
+    public PlayerDTO registerPlayer(RegisterRequest request) {
+
+        if (playerRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new DuplicatePlayerException("Player with this email already exists");
         }
+
+        Player player = new Player();
+        player.setName(request.getName());
+        player.setJerseyNo(request.getJerseyNo());
+        player.setTeamColor(request.getTeamColor());
+        player.setRole(request.getRole());
+        player.setEmail(request.getEmail());
+        player.setPassword(request.getPassword());
+
         Player saved = playerRepository.save(player);
+
         return convertToDto(saved);
     }
 
 
     public PlayerDTO loginPlayer(String email, String password) {
+
         Player player = playerRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Invalid Email or Password"));
+                        new InvalidCredentialsException("Invalid email or password")
+                );
 
         if (!player.getPassword().equals(password)) {
-            throw new IllegalArgumentException("Invalid Email or Password");
+            throw new InvalidCredentialsException("Invalid email or password");
         }
 
         return convertToDto(player);
