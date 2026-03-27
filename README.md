@@ -8,8 +8,6 @@
 
 > Backend: `http://localhost:8080`  
 > Frontend: `http://localhost:5173`  
-> _(Deployment coming soon — Railway / Render)_
-
 ---
 
 ## 📸 Project Overview
