@@ -6,107 +6,101 @@ import com.cricket.fever.dto.RegisterRequest;
 import com.cricket.fever.exception.DuplicatePlayerException;
 import com.cricket.fever.exception.InvalidCredentialsException;
 import com.cricket.fever.exception.PlayerNotFoundException;
+import com.cricket.fever.mapper.PlayerMapper;
 import com.cricket.fever.repository.PlayerRepository;
-import org.jspecify.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class PlayerService {
 
-    @Autowired
-    private PlayerRepository playerRepository;
+    private final PlayerRepository playerRepository;
+    private final PlayerMapper playerMapper;
+    private final PasswordEncoder passwordEncoder;
+
+    public PlayerService(PlayerRepository playerRepository,
+                         PlayerMapper playerMapper,
+                         PasswordEncoder passwordEncoder) {
+        this.playerRepository = playerRepository;
+        this.playerMapper = playerMapper;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Transactional
-    public PlayerDTO updateProfile(PlayerDTO dto) {
-
-        Player entity = playerRepository.findById(dto.getId())
-                .orElseThrow(() ->
-                        new PlayerNotFoundException("Player not found with ID: " + dto.getId()));
-
-        entity.setName(dto.getName());
-        entity.setJerseyNo(dto.getJerseyNo());
-        entity.setTeamColor(dto.getTeamColor());
-        entity.setRole(dto.getRole());
-
-        Player savedEntity = playerRepository.save(entity);
-
-
-        return convertToDto(savedEntity);
-    }
-
-
-    public PlayerDTO getPlayer(Long id) {
-        Player player = playerRepository.findById(id)
-                .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + id));
-        return convertToDto(player);
-    }
-
-    private PlayerDTO convertToDto(Player player) {
-        PlayerDTO dto = new PlayerDTO();
-        dto.setId(player.getId());
-        dto.setName(player.getName());
-        dto.setJerseyNo(player.getJerseyNo());
-        dto.setTeamColor(player.getTeamColor());
-        dto.setRole(player.getRole());
-        return dto;
-    }
-
-
-
-
-    public @Nullable List<PlayerDTO> searchByJersey(String query) {
-
-        List<Player> players = playerRepository.findByJerseyNo(query);
-
-
-        return players.stream().map(player -> {
-            PlayerDTO dto = new PlayerDTO();
-            dto.setId(player.getId());
-            dto.setName(player.getName());
-            dto.setJerseyNo(player.getJerseyNo());
-            dto.setTeamColor(player.getTeamColor());
-            dto.setRole(player.getRole());
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
     public PlayerDTO registerPlayer(RegisterRequest request) {
 
         if (playerRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new DuplicatePlayerException("Player with this email already exists");
+            throw new DuplicatePlayerException(
+                    "A player with email '" + request.getEmail() + "' already exists"
+            );
         }
 
         Player player = new Player();
         player.setName(request.getName());
+        player.setEmail(request.getEmail());
+        // BCrypt encode — safe because @NotBlank ensures password is never null
+        player.setPassword(passwordEncoder.encode(request.getPassword()));
         player.setJerseyNo(request.getJerseyNo());
         player.setTeamColor(request.getTeamColor());
-        player.setRole(request.getRole());
-        player.setEmail(request.getEmail());
-        player.setPassword(request.getPassword());
+        // Default to PLAYER if client doesn't send a role
+        player.setRole(request.getRole() != null ? request.getRole() : "PLAYER");
 
         Player saved = playerRepository.save(player);
-
-        return convertToDto(saved);
+        return playerMapper.toDTO(saved);
     }
 
-
+    @Transactional(readOnly = true)
     public PlayerDTO loginPlayer(String email, String password) {
 
         Player player = playerRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new InvalidCredentialsException("Invalid email or password")
-                );
+                        new InvalidCredentialsException("Invalid email or password"));
 
-        if (!player.getPassword().equals(password)) {
+        // BCrypt comparison — never compare plain text
+        if (!passwordEncoder.matches(password, player.getPassword())) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
 
-        return convertToDto(player);
+        return playerMapper.toDTO(player);
+    }
+
+    @Transactional(readOnly = true)
+    public PlayerDTO getPlayer(Long id) {
+
+        Player player = playerRepository.findById(id)
+                .orElseThrow(() ->
+                        new PlayerNotFoundException("Player not found with id: " + id));
+
+        return playerMapper.toDTO(player);
+    }
+
+    @Transactional
+    public PlayerDTO updateProfile(PlayerDTO dto) {
+
+        Player player = playerRepository.findById(dto.getId())
+                .orElseThrow(() ->
+                        new PlayerNotFoundException("Player not found with id: " + dto.getId()));
+
+        player.setName(dto.getName());
+        player.setJerseyNo(dto.getJerseyNo());
+        player.setTeamColor(dto.getTeamColor());
+        // Role is not editable via profile update for security reasons
+
+        Player updated = playerRepository.save(player);
+        return playerMapper.toDTO(updated);
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<PlayerDTO> searchByJersey(String query) {
+        return playerRepository
+                .findByJerseyNoContainingIgnoreCase(query)
+                .stream()
+                .map(playerMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

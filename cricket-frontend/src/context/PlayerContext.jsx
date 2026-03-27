@@ -23,10 +23,9 @@ export const PlayerProvider = ({ children }) => {
           `http://localhost:8080/api/players/${savedId}`
         );
         if (response.ok) {
-          const data = await response.json();
-          setPlayer(data);
+          const result = await response.json();
+          setPlayer(result.data);
         } else {
-        
           localStorage.removeItem("playerId");
           navigate("/auth");
         }
@@ -41,11 +40,11 @@ export const PlayerProvider = ({ children }) => {
     fetchInitialProfile();
   }, [navigate]);
 
-  const updatePlayer = (userData) => {
-    if (userData && userData.id) {
-      localStorage.setItem("playerId", userData.id);
+  const updatePlayer = (playerData) => {
+    if (playerData && playerData.id) {
+      localStorage.setItem("playerId", playerData.id);
     }
-    setPlayer(userData);
+    setPlayer(playerData);
   };
 
   const logout = () => {
@@ -53,7 +52,6 @@ export const PlayerProvider = ({ children }) => {
     setPlayer(null);
     navigate("/auth");
   };
-
 
   if (loading) {
     return (

@@ -1,5 +1,7 @@
 package com.cricket.fever.controller;
 
+import com.cricket.fever.common.response.ApiResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,14 +11,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+
 @RestController
 @RequestMapping("/api/news")
 @CrossOrigin(origins = "http://localhost:5173")
 public class NewsController {
 
     @GetMapping("/latest")
-    public List<Map<String, String>> getLatestNews() {
-        return Arrays.asList(
+    public ResponseEntity<ApiResponse<List<Map<String, String>>>> getLatestNews() {
+
+        List<Map<String, String>> articles = Arrays.asList(
                 Map.of(
                         "category", "Breaking",
                         "title", "Champions Trophy: High-voltage final scheduled for Sunday",
@@ -28,7 +32,17 @@ public class NewsController {
                         "title", "Tactical shift: Why spinners will dominate in Chennai",
                         "description", "As the pitch wears down, experts believe the dry surface will play into the hands of spinners.",
                         "time", "5 Mins Read"
+                ),
+                Map.of(
+                        "category", "Player Focus",
+                        "title", "Jasprit Bumrah cleared for Champions Trophy after fitness test",
+                        "description", "India's pace spearhead is fit and raring to go after a brief injury scare last week.",
+                        "time", "3 Mins Read"
                 )
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "News fetched successfully", articles)
         );
     }
 }

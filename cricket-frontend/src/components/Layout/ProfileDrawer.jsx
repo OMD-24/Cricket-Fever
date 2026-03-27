@@ -43,7 +43,8 @@ const ProfileDrawer = ({ isOpen, onClose }) => {
 
           <div className="flex items-center gap-4 mt-4">
             <div
-              className={`h-16 w-16 rounded-2xl ${player.teamColor} border-2 border-white flex flex-col items-center justify-center shadow-lg`}
+              className={`h-16 w-16 rounded-2xl border-2 border-white flex flex-col items-center justify-center shadow-lg`}
+              style={{ backgroundColor: player?.teamColor || "#1d4ed8" }}
             >
               <span className="text-[8px] font-black uppercase">No.</span>
               <span className="text-2xl font-black italic leading-none">
@@ -82,7 +83,13 @@ const ProfileDrawer = ({ isOpen, onClose }) => {
             icon={<ArrowLeftOnRectangleIcon className="h-5 w-5 text-red-500" />}
             label="Exit Stadium (Logout)"
             danger
-            onClick={() => handleNavigation("/auth")}
+            onClick={() => {
+              if (window.confirm("Are you sure you want to log out?")) {
+                 navigate("/auth");
+                 localStorage.removeItem("playerId");
+                 window.location.reload(); 
+              }
+            }}
           />
         </nav>
       </div>

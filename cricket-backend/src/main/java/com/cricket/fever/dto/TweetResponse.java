@@ -1,20 +1,19 @@
 package com.cricket.fever.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
+import java.time.LocalDateTime;
+
+@Getter
 @AllArgsConstructor
-@NoArgsConstructor
-public class PlayerDTO {
+public class TweetResponse {
 
     private Long id;
     private String name;
     private String jerseyNo;
     private String teamColor;
-    private String role;
-
-
-
+    private String text;
+    private Integer cheers;
+    private LocalDateTime createdAt;
 }

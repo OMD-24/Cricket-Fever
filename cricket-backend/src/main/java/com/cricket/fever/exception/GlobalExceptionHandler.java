@@ -5,54 +5,90 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
 
     @ExceptionHandler(PlayerNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponse<?> handlePlayerNotFound(PlayerNotFoundException ex) {
-        return new ApiResponse<>(false, ex.getMessage(), null);
+
+        return new ApiResponse<>(
+                false,
+                ex.getMessage(),
+                null
+        );
     }
 
 
     @ExceptionHandler(TweetNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponse<?> handleTweetNotFound(TweetNotFoundException ex) {
-        return new ApiResponse<>(false, ex.getMessage(), null);
-    }
 
+        return new ApiResponse<>(
+                false,
+                ex.getMessage(),
+                null
+        );
+    }
 
     @ExceptionHandler(DuplicatePlayerException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponse<?> handleDuplicatePlayer(DuplicatePlayerException ex) {
-        return new ApiResponse<>(false, ex.getMessage(), null);
-    }
 
+        return new ApiResponse<>(
+                false,
+                ex.getMessage(),
+                null
+        );
+    }
 
     @ExceptionHandler(InvalidCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiResponse<?> handleInvalidCredentials(InvalidCredentialsException ex) {
-        return new ApiResponse<>(false, ex.getMessage(), null);
+
+        return new ApiResponse<>(
+                false,
+                ex.getMessage(),
+                null
+        );
     }
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResponse<?> handleValidation(MethodArgumentNotValidException ex) {
+    public ApiResponse<Map<String, String>> handleValidationErrors(
+            MethodArgumentNotValidException ex) {
 
-        String errorMessage = ex.getBindingResult()
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult()
                 .getFieldErrors()
-                .get(0)
-                .getDefaultMessage();
+                .forEach(error ->
+                        errors.put(
+                                error.getField(),
+                                error.getDefaultMessage()
+                        )
+                );
 
-        return new ApiResponse<>(false, errorMessage, null);
+        return new ApiResponse<>(
+                false,
+                "Validation Failed",
+                errors
+        );
     }
 
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse<?> handleGenericException(Exception ex) {
-        return new ApiResponse<>(false, "Something went wrong", null);
+
+        return new ApiResponse<>(
+                false,
+                "Something went wrong: " + ex.getMessage(),
+                null
+        );
     }
 }

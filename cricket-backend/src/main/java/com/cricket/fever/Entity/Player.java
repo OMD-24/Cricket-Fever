@@ -1,35 +1,38 @@
 package com.cricket.fever.Entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Generated;
-
-import java.util.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Data
 @Table(name = "players")
-public class Player{
+@Getter
+@Setter
+public class Player {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonProperty("name")
+    @NotBlank(message = "Name is required")
     private String name;
-    @JsonProperty("jerseyNo")
-    private String jerseyNo;
-    @JsonProperty("teamColor")
-    private String teamColor;
-    @JsonProperty("role")
-    private String role;
 
     @Column(unique = true)
+    @Email(message = "Invalid email")
+    @NotBlank(message = "Email is required")
     private String email;
+
+    @NotBlank(message = "Password is required")
     private String password;
 
-    public Long getId() {
-        return id;
-    }
+    @NotBlank(message = "Jersey number required")
+    private String jerseyNo;
+
+    @NotBlank(message = "Team color required")
+    private String teamColor;
+
+
+    private String role = "PLAYER";
 }

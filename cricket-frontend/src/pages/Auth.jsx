@@ -11,6 +11,7 @@ const Auth = () => {
     name: "",
     jerseyNo: "",
     teamColor: "#1d4ed8",
+    role: "PLAYER",
     email: "",
     password: "",
   });
@@ -32,14 +33,18 @@ const Auth = () => {
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
-        const authenticatedPlayer = await response.json();
-        // Saves user to Context AND localStorage
-        updatePlayer(authenticatedPlayer);
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        updatePlayer(result.data);
         navigate("/");
       } else {
-        const errorMsg = await response.text();
-        setError(errorMsg || "Invalid credentials.");
+        if (result.data && typeof result.data === 'object' && !Array.isArray(result.data)) {
+           const messages = Object.values(result.data).join(" | ");
+           setError(messages || result.message || "Registration failed.");
+        } else {
+           setError(result.message || "Invalid credentials.");
+        }
       }
     } catch (err) {
       setError("Cannot reach backend server. Is Spring Boot running?");

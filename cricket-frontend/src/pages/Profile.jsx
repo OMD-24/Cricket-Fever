@@ -19,8 +19,8 @@ const Profile = () => {
             `http://localhost:8080/api/players/${id}`
           );
           if (response.ok) {
-            const data = await response.json();
-            setViewedPlayer(data);
+            const result = await response.json();
+            setViewedPlayer(result.data);
           }
         } catch (error) {
           console.error("Scouting Error: Could not find player", error);
@@ -33,9 +33,20 @@ const Profile = () => {
     }
   }, [id, currentPlayer]);
 
-  const handleSave = () => {
-    const updatedData = { ...currentPlayer, ...editData };
-    updatePlayer(updatedData);
+  const handleSave = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/players/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...currentPlayer, ...editData }),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        updatePlayer(result.data);
+      }
+    } catch (error) {
+      console.error("Locker Error: Could not save profile", error);
+    }
     setIsEditing(false);
   };
 
@@ -57,13 +68,10 @@ const Profile = () => {
             <div className="w-full h-full opacity-40 bg-[url('https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&q=80&w=1000')] bg-cover bg-center"></div>
           </div>
 
-    
           <div className="px-8 -mt-16 relative z-10 flex items-end gap-6">
-      
             <div
-              className={`h-32 w-32 rounded-3xl ${
-                viewedPlayer.teamColor || "bg-black"
-              } border-4 border-white shadow-xl flex flex-col items-center justify-center text-white transition-colors duration-500`}
+              className="h-32 w-32 rounded-3xl border-4 border-white shadow-xl flex flex-col items-center justify-center text-white transition-colors duration-500"
+              style={{ backgroundColor: viewedPlayer.teamColor || "#1d4ed8" }}
             >
               <span className="text-xs font-black uppercase opacity-80">
                 No.
@@ -76,7 +84,6 @@ const Profile = () => {
               <h1 className="text-3xl font-black italic uppercase tracking-tighter">
                 {viewedPlayer.name}
               </h1>
-
               <p className="text-gray-500 font-bold uppercase tracking-wide text-xs">
                 {viewedPlayer.role} ·{" "}
                 {isOwnProfile ? "Active Pro" : "Draft Prospect"}
@@ -84,7 +91,6 @@ const Profile = () => {
             </div>
           </div>
         </div>
-
 
         <div className="flex justify-around py-8 border-b border-gray-100 mt-4 mx-8 text-center">
           <Stat label="Innings" value="154" />
@@ -130,20 +136,19 @@ const Profile = () => {
                 onChange={(v) => setEditData({ ...editData, jerseyNo: v })}
               />
 
-              <EditInput
-                label="Team Color (Tailwind Class)"
-                value={editData.teamColor}
-                placeholder="e.g., bg-red-600"
-                onChange={(v) => setEditData({ ...editData, teamColor: v })}
-              />
-
-  
-              <EditInput
-                label="Player Role"
-                value={editData.role}
-                placeholder="e.g., All-Rounder"
-                onChange={(v) => setEditData({ ...editData, role: v })}
-              />
+              <div>
+                <label className="text-[10px] font-black uppercase text-gray-400 block mb-1">
+                  Jersey Color
+                </label>
+                <input
+                  type="color"
+                  className="w-full h-10 rounded-lg"
+                  value={editData.teamColor || "#1d4ed8"}
+                  onChange={(e) =>
+                    setEditData({ ...editData, teamColor: e.target.value })
+                  }
+                />
+              </div>
 
               <div className="flex gap-2 pt-2">
                 <button

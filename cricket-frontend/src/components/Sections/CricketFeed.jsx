@@ -6,20 +6,18 @@ import {
   TrashIcon,
   CheckBadgeIcon,
 } from "@heroicons/react/24/outline";
-import { TrophyIcon as TrophySolid } from "@heroicons/react/24/solid";
 
 const CricketFeed = ({ extraPosts = [] }) => {
   const [baseTweets, setBaseTweets] = useState([]);
   const [cheeredTweets, setCheeredTweets] = useState({});
 
-  
   useEffect(() => {
     const fetchTweets = async () => {
       try {
         const response = await fetch("http://localhost:8080/api/tweets/all");
         if (response.ok) {
-          const data = await response.json();
-          setBaseTweets(data);
+          const result = await response.json();
+          setBaseTweets(result.data || []);
         }
       } catch (error) {
         console.error("Failed to fetch the Pitch feed:", error);
@@ -28,17 +26,13 @@ const CricketFeed = ({ extraPosts = [] }) => {
     fetchTweets();
   }, []);
 
-  
   const allTweets = [...extraPosts, ...baseTweets];
 
-  
   const handleDelete = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/tweets/delete/${id}`,
-        {
-          method: "DELETE",
-        }
+        `http://localhost:8080/api/tweets/${id}`,
+        { method: "DELETE" }
       );
       if (response.ok) {
         setBaseTweets(baseTweets.filter((t) => t.id !== id));
@@ -48,59 +42,18 @@ const CricketFeed = ({ extraPosts = [] }) => {
     }
   };
 
- 
-
-  const toggleCheer = async (tweetId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/tweets/${tweetId}/cheer`,
-        {
-          method: "PATCH",
-        }
-      );
-
-      if (response.ok) {
-        const updatedTweet = await response.json();
-
-        
-        setBaseTweets((prev) =>
-          prev.map((t) => (t.id === tweetId ? updatedTweet : t))
-        );
-
-       
-        setCheeredTweets((prev) => ({
-          ...prev,
-          [tweetId]: true,
-        }));
-      }
-    } catch (error) {
-      console.error("Could not send cheer to the pitch:", error);
-    }
-  };
-
   const handleCheer = async (tweetId) => {
     try {
-      
       const response = await fetch(
         `http://localhost:8080/api/tweets/${tweetId}/cheer`,
-        {
-          method: "PATCH",
-        }
+        { method: "PATCH" }
       );
-
       if (response.ok) {
-        const updatedTweet = await response.json();
-
-        
+        const result = await response.json();
         setBaseTweets((prev) =>
-          prev.map((t) => (t.id === tweetId ? updatedTweet : t))
+          prev.map((t) => (t.id === tweetId ? result.data : t))
         );
-
-        
-        setCheeredTweets((prev) => ({
-          ...prev,
-          [tweetId]: true,
-        }));
+        setCheeredTweets((prev) => ({ ...prev, [tweetId]: true }));
       }
     } catch (error) {
       console.error("Pitch Error: Could not send cheer", error);
@@ -123,15 +76,14 @@ const CricketFeed = ({ extraPosts = [] }) => {
           >
             <div className="flex gap-4">
               <div
-                className={`h-12 w-12 rounded-xl ${
-                  tweet.color || "bg-blue-700"
-                } border-2 border-black flex flex-col items-center justify-center shadow-sm shrink-0 mt-1 transition-transform group-hover:rotate-2`}
+                className="h-12 w-12 rounded-xl border-2 border-black flex flex-col items-center justify-center shadow-sm shrink-0 mt-1 transition-transform group-hover:rotate-2"
+                style={{ backgroundColor: tweet.teamColor || "#1d4ed8" }}
               >
                 <span className="text-[6px] text-white font-black leading-none uppercase">
                   No.
                 </span>
                 <span className="text-sm text-white font-black italic">
-                  {tweet.no || tweet.jerseyNo || "00"}
+                  {tweet.jerseyNo || "00"}
                 </span>
               </div>
 
@@ -147,7 +99,6 @@ const CricketFeed = ({ extraPosts = [] }) => {
                     </span>
                   </div>
 
-
                   <button
                     onClick={() => handleDelete(tweet.id)}
                     className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-600 transition-all p-1"
@@ -160,7 +111,6 @@ const CricketFeed = ({ extraPosts = [] }) => {
                 <p className="mt-1 text-gray-800 text-[14px] leading-relaxed font-medium italic">
                   {tweet.text}
                 </p>
-
 
                 <div className="flex justify-between items-center mt-3 max-w-[85%] text-gray-500">
                   <div className="flex items-center gap-1.5 hover:text-blue-500 cursor-pointer transition-colors group/action">
@@ -187,15 +137,13 @@ const CricketFeed = ({ extraPosts = [] }) => {
                   >
                     <div
                       className={`p-2 rounded-full ${
-                        cheeredTweets[tweet.id]
-                          ? "bg-red-50"
-                          : "hover:bg-red-50"
+                        cheeredTweets[tweet.id] ? "bg-red-50" : "hover:bg-red-50"
                       }`}
                     >
                       <TrophyIcon className="h-4 w-4" />
                     </div>
                     <span className="text-[10px] font-bold">
-                      {tweet.cheers || "0"}
+                      {tweet.cheers ?? 0}
                     </span>
                   </div>
 

@@ -1,30 +1,28 @@
 import React, { useState, useEffect } from "react";
 import MatchCard from "../components/Sections/MatchCard";
 
-
 const Matches = () => {
   const [filter, setFilter] = useState("live");
   const [matchList, setMatchList] = useState([]);
   const [standings, setStandings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-
   useEffect(() => {
     const fetchMatchData = async () => {
       setIsLoading(true);
       try {
-    
+      
         const matchRes = await fetch(
           `http://localhost:8080/api/matches/${filter}`
         );
-        const matchData = await matchRes.json();
-        setMatchList(matchData);
+        const matchResult = await matchRes.json();
+        setMatchList(matchResult.data || []);
 
         const standingsRes = await fetch(
           "http://localhost:8080/api/matches/standings"
         );
-        const standingsData = await standingsRes.json();
-        setStandings(standingsData);
+        const standingsResult = await standingsRes.json();
+        setStandings(standingsResult.data || []);
       } catch (error) {
         console.error("Scoreboard connection error:", error);
       } finally {
@@ -75,7 +73,6 @@ const Matches = () => {
           )}
         </div>
       </div>
-
 
       <aside className="flex-[0.3] hidden lg:flex flex-col h-full p-4 bg-white overflow-hidden">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-gray-400">

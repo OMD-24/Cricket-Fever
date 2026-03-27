@@ -11,19 +11,19 @@ public class RegisterRequest {
     @NotBlank(message = "Name is required")
     private String name;
 
-    @NotBlank(message = "Jersey number required")
+    @NotBlank(message = "Jersey number is required")
     private String jerseyNo;
 
-    @NotBlank(message = "Team color required")
+    @NotBlank(message = "Team color is required")
     private String teamColor;
 
-    @NotBlank(message = "Role required")
     private String role;
 
-    @Email(message = "Email must be valid")
-    @NotBlank(message = "Email required")
+    @Email(message = "Email must be a valid format")
+    @NotBlank(message = "Email is required")
     private String email;
 
+    @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 }

@@ -1,10 +1,10 @@
 package com.cricket.fever.controller;
 
-import com.cricket.fever.Entity.Tweet;
 import com.cricket.fever.common.response.ApiResponse;
+import com.cricket.fever.dto.TweetRequest;
+import com.cricket.fever.dto.TweetResponse;
 import com.cricket.fever.service.TweetService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,30 +15,33 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173")
 public class TweetController {
 
-    @Autowired
-    private TweetService tweetService;
 
-    // ✅ Broadcast Tweet
+    private final TweetService tweetService;
+
+    public TweetController(TweetService tweetService){
+        this.tweetService = tweetService;
+    }
+
     @PostMapping("/broadcast")
-    public ResponseEntity<ApiResponse<Tweet>> broadcast(
-            @Valid @RequestBody Tweet tweet) {
+    public ResponseEntity<ApiResponse<TweetResponse>> broadcast(
+            @Valid @RequestBody TweetRequest request) {
 
-        Tweet savedTweet = tweetService.saveTweet(tweet);
+        TweetResponse response = tweetService.saveTweet(request);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         true,
                         "Broadcast posted successfully",
-                        savedTweet
+                        response
                 )
         );
     }
 
-    // ✅ Get All Tweets
-    @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<Tweet>>> getAll() {
 
-        List<Tweet> tweets = tweetService.getAllTweets();
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<TweetResponse>>> getAllTweets() {
+
+        List<TweetResponse> tweets = tweetService.getAllTweets();
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -49,8 +52,8 @@ public class TweetController {
         );
     }
 
-    // ✅ Delete Tweet
-    @DeleteMapping("/delete/{id}")
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteTweet(
             @PathVariable Long id) {
 
@@ -65,12 +68,12 @@ public class TweetController {
         );
     }
 
-    // ✅ Cheer Tweet
+
     @PatchMapping("/{id}/cheer")
-    public ResponseEntity<ApiResponse<Tweet>> cheerTweet(
+    public ResponseEntity<ApiResponse<TweetResponse>> cheerTweet(
             @PathVariable Long id) {
 
-        Tweet updatedTweet = tweetService.incrementCheers(id);
+        TweetResponse updatedTweet = tweetService.incrementCheers(id);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(

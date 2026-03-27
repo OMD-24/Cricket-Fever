@@ -1,22 +1,13 @@
-package com.cricket.fever.Entity;
+package com.cricket.fever.dto;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "tweets")
 @Getter
 @Setter
-public class Tweet {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class TweetRequest {
 
     @NotBlank(message = "Name is required")
     private String name;
@@ -29,16 +20,5 @@ public class Tweet {
 
     @NotBlank(message = "Text cannot be empty")
     @Size(max = 280, message = "Tweet cannot exceed 280 characters")
-    @Column(length = 280)
     private String text;
-
-    private Integer cheers = 0;
-
-    private LocalDateTime createdAt;
-
-
-    @PrePersist
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 }

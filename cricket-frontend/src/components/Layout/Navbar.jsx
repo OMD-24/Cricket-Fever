@@ -24,13 +24,14 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           <div
             onClick={() => setDrawerOpen(true)}
-            className={`h-10 w-10 rounded-xl ${player.teamColor} border-2 border-black flex flex-col items-center justify-center cursor-pointer hover:rotate-3 transition-transform shadow-sm`}
+            className="h-10 w-10 rounded-xl border-2 border-black flex flex-col items-center justify-center cursor-pointer hover:rotate-3 transition-transform shadow-sm"
+            style={{ backgroundColor: player?.teamColor || "#1d4ed8" }}
           >
             <span className="text-[6px] text-white font-black leading-none uppercase">
               No.
             </span>
             <span className="text-sm text-white font-black italic">
-              {player.jerseyNo}
+              {player?.jerseyNo}
             </span>
           </div>
           <h1 className="hidden md:block text-xl font-black italic tracking-tighter uppercase">

@@ -8,19 +8,21 @@ const SearchFeed = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    
+    // Debounced search: waits 300ms after user stops typing
     const delayDebounceFn = setTimeout(() => {
       if (query.trim().length > 0) {
         fetch(`http://localhost:8080/api/players/search?q=${query}`)
           .then((res) => res.json())
-          .then((data) => setResults(data))
+          .then((result) => {
+            // Unwrap ApiResponse<List<PlayerDTO>> to get the actual list
+            setResults(result.data || []);
+          })
           .catch((err) => console.error("Search Error:", err));
       } else {
         setResults([]);
       }
-    }, 300); 
+    }, 300);
 
-    
     return () => clearTimeout(delayDebounceFn);
   }, [query]);
 
@@ -48,10 +50,10 @@ const SearchFeed = () => {
             className="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl hover:border-black transition-all group"
           >
             <div className="flex items-center gap-3">
+              {/* Jersey badge uses inline style so hex teamColor renders correctly */}
               <div
-                className={`h-10 w-10 rounded-xl ${
-                  player.teamColor || "bg-black"
-                } flex flex-col items-center justify-center text-white shadow-sm`}
+                className="h-10 w-10 rounded-xl flex flex-col items-center justify-center text-white shadow-sm"
+                style={{ backgroundColor: player.teamColor || "#1d4ed8" }}
               >
                 <span className="text-[6px] font-black uppercase leading-none">
                   No.

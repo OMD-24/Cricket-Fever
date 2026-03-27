@@ -10,8 +10,8 @@ const News = () => {
       try {
         const response = await fetch("http://localhost:8080/api/news/latest");
         if (response.ok) {
-          const data = await response.json();
-          setArticles(data);
+          const result = await response.json();
+          setArticles(result.data || []);
         }
       } catch (error) {
         console.error("Failed to fetch news headlines:", error);
@@ -47,7 +47,6 @@ const News = () => {
               </div>
             </div>
           )}
-
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {loading ? (
@@ -89,7 +88,6 @@ const News = () => {
             </div>
           ))}
         </div>
-
 
         <div className="mt-10 p-5 bg-black rounded-2xl border-b-4 border-red-600 shadow-xl">
           <h3 className="text-white font-black italic text-sm uppercase">
